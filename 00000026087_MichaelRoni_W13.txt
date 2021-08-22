@@ -1,0 +1,118 @@
+mysql -h localhost -u root
+
+set sql_mode ='';
+
+drop database ikea;
+create database ikea;
+use ikea;
+SOURCE D:/ikea.sql;
+
+
+
+drop function count_product;
+delimiter //
+create function count_product(dicari varchar(30)) returns int
+begin
+	declare hasil int;
+	set hasil = (select count(*) from products where ProductName like(dicari));
+	return hasil;
+end//
+delimiter ; 
+
+drop procedure searh_product;
+delimiter //
+create procedure searh_product ( in cari varchar(20))
+begin
+	declare dicari varchar(30);
+	set dicari = concat('%',cari,'%');
+	if count_product(dicari) = 0 then
+		select 'Data Not Found' as 'Results';
+	else
+		select concat(count(*),' Data Found') as 'Results' from products where ProductName like(dicari)
+		union
+		select ' '
+		union 
+		select ProductName from products where ProductName like(dicari);
+	end if;
+end//
+delimiter ;
+
+call searh_product('shelving');
+call searh_product('sendok');
+
+drop function count_people;
+delimiter //
+create function count_people(dicari varchar(30)) returns int
+begin
+	declare hasil int;
+	set hasil = (select count(*) from employees where EmployeeId like(dicari));
+	return hasil;
+end//
+delimiter ; 
+
+drop procedure search_people;
+delimiter //
+create procedure search_people ( in cari varchar(20))
+begin
+	declare dicari varchar(30);
+	set dicari = concat('%',cari,'%');
+	if count_people(dicari) = 0 then
+		select 'ID Invalid! Please Try Again' as 'Results';
+	else
+		select concat('ID Found!') as 'Results'
+		union
+		select concat(rpad('Employee ID',15,' '),':',employeeID)from employees where employeeID like dicari
+		union
+		select concat(rpad('Full Name',15,' '),':',concat(FirstName,' ',LastName))from employees where employeeID like dicari
+		union
+		select concat(rpad('City',15,' '),':',city)from employees where employeeID like dicari
+		union
+		select concat(rpad('Postal Code',15,' '),':',PostalCode)from employees where employeeID like dicari
+		union
+		select concat(rpad('Phone Number',15,' '),':',PhoneNumber)from employees where employeeID like dicari;
+	end if;
+end//
+delimiter ;
+
+call search_people('E0001');
+call search_people('E1000');
+
+
+drop function email_special;
+delimiter //
+create function email_special(firstName varchar(30),lastName varchar(30)) returns varchar(100)
+begin
+	declare hasil varchar(100);
+	set hasil = concat(firstName,'.',lastName,'@ikeamail.com');
+	return hasil;
+end//
+delimiter ; 
+
+select concat(Firstname,' ',lastName) as 'FULL NAME', email_special(firstName,lastName) as 'Email' from employees;
+
+create table product_history (
+	articleid varchar(15),
+	productname varchar(100),
+	stock int,
+	stock_changes int,
+	update_date date,
+	primary key(articleid,stock_changes,update_date)
+);
+
+delimiter //
+
+create trigger update_product
+	after update on products for each row
+begin
+	insert into product_history
+	values(old.ArticleID,old.ProductName,old.stock,new.stock - old.stock,CURRENT_DATE);
+end//
+delimiter ; 
+
+update products set stock = 40 where articleid = '999.322.72';
+
+select * from product_history;
+
+update products set stock = 60 where articleid = '999.318.09';
+
+select * from product_history;

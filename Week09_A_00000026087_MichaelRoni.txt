@@ -1,0 +1,84 @@
+mysql -u root
+drop database ikea;
+create database ikea;
+use ikea;
+SOURCE D:/ikea.sql;
+
+select concat(FirstName,' ',LastName) as Name, d.DeptName as Departement
+from employees as e join depts as d on (e.DeptID = d.DeptID)
+where e.DeptID is not NULL
+order by 2;
+
+select concat(e2.FirstName,' ',e2.LastName) as 'Employee Name', concat(e1.FirstName,' ',e1.LastName) as 'Manager Name' 
+from employees as e1 join employees as e2 on (e1.EmployeeID = e2.ManagerID)
+where e2.ManagerID is not NULL
+order by 2 , 1;
+
+select concat(e.FirstName,' ',e.LastName) as Name, group_concat(distinct(o.OrderID) separator ' - ') as Orders
+from employees as e join orders as o on (e.EmployeeID = o.EmployeeID)
+group by e.EmployeeID
+order by 1;
+
+select p.ProductName as 'Product Name', sum(od.qty) as 'Total Sold'
+from products as p join orderdetails as od on (p.ArticleID = od.ArticleID)
+group by p.ArticleID
+order by 2 desc;
+
+select p.ProductName as 'Product Name', sum(od.qty) as 'Total Sold'
+from products as p join orderdetails as od on (p.ArticleID = od.ArticleID)
+group by p.ArticleID
+order by 2 desc;
+
+select p.ProductName as 'Product Name', 
+	case when sum(od.qty) is NULL then 0
+	else sum(od.qty) end as 'Total Sold'
+from products as p left join orderdetails as od on (p.ArticleID = od.ArticleID)
+group by p.ArticleID
+order by 2 desc;
+
+select o.OrderID as 'Order ID', sum(od.Price) as Total, concat(e.FirstName,' ',e.LastName) as 'In Charge'
+from orders as o join employees as e on (o.EmployeeID = e.EmployeeID) join orderdetails as od on (o.OrderID = od.OrderID)
+group by 1
+order by 3;
+
+select concat(e.FirstName,' ',e.LastName) as Employee, round(sum(od.price)*0.12) as Contribution, round(j.Salary * 0.05) as Bonus
+from employees as e join orders as o on(e.EmployeeID = o.EmployeeID) join orderdetails as od on(o.OrderId = od.OrderID) join jobs as j on(e.JobId = j.JobID)
+group by 1
+having (sum(od.price)*0.12) > 500000
+order by 2 desc;
+
+select concat(rpad(concat(e.FirstName,' ',e.LastName),30,' '),' ',
+	rpad(concat(
+	case 
+		when  e.JobID = 'J0005' then 'Works in a '
+		when j.JobDesc like ('A%')	then 'Works as an '
+		when j.JobDesc like ('E%')	then 'Works as an '
+		when j.JobDesc like ('I%')	then 'Works as an '
+		when j.JobDesc like ('O%')	then 'Works as an '
+		when j.JobDesc like ('U%')  then 'Works as an '
+		else 'Works as a ' 
+	end,
+	j.JobDesc),50,' '),' In ',d.DeptName,' Departement') as 'Employees Information'
+from employees as e join jobs as j on (e.JobId = j.JobId) join depts as d on (e.DeptID = d.DeptId);
+
+set @@AUTOCOMMIT = 0;
+
+update jobs 
+set salary = 0;
+
+savepoint ikea_gaji_nol;
+
+update employees
+set FirstName = 'Tommy';
+
+select FirstName from employees;
+
+rollback to savepoint ikea_gaji_nol;
+
+select FirstName from employees;
+
+select * from jobs;
+
+rollback;
+
+select * from jobs;

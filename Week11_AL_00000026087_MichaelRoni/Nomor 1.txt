@@ -1,0 +1,31 @@
+mysql -u root
+drop database pemilihan;
+create database pemilihan;
+use pemilihan;
+
+create table calon(
+	ID_Calon varchar(6) primary key,
+	Nama_Calon varchar(50) not null
+);
+
+create table pemilihan(
+	ID_Pemilih varchar(5) primary key,
+	Nama_pemilih varchar(30) not null,
+	Nomor_Telepon_Penduduk varchar(20) not null,
+	ID_Calon varchar(6),
+	foreign key (ID_Calon) references calon(ID_Calon)
+);
+
+insert into calon
+values ('PR0001','Dennis Wicaksana'),('PR0002','Arya Gunawan');
+
+insert into pemilihan
+values('PD001','Anna','2031203','PR0001');
+insert into pemilihan
+values('PD002','Sukijah','2301223','PR0001');
+insert into pemilihan
+values('PD003','Kana','2033012','PR0001');
+insert into pemilihan
+values('PD004','Kiri','2334059','PR0002');
+insert into pemilihan
+values('PD005','Okta','9332333','PR0002');

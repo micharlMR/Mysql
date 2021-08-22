@@ -1,0 +1,163 @@
+mysql -h localhost -u root
+
+set sql_mode ='';
+
+drop database ikea;
+create database ikea;
+use ikea;
+SOURCE D:/ikea.sql;
+
+/*1*/
+drop view if exists service_and_total;
+
+create view service_and_total
+as
+select o.OrderID as "Order ID", date_format(o.OrderDate,"%d %M %y") as Date, s.ServiceDesc as "Service Type", s.Price as "Service", sum(od.Price * od.Qty + s.Price ) as Total
+from orders as o join servicedetails  as sd on (o.OrderID = sd.OrderID) join services as s on (sd.ServiceID = s.ServiceID) join orderdetails as od on (o.OrderID = od.OrderID)
+group by 1 , sd.ServiceID
+having s.Price is not NULL;
+
+select * from service_and_total;
+
+/*2*/
+drop view if exists sales_by_year_month;
+
+create view sales_by_year_month
+as
+select year(o.OrderDate) as "Year", Monthname(o.OrderDate) as "Month" ,count(*) as "Jumlah Transaksi" , concat("Rp. ",sum(od.Price * od.Qty)) as Sales
+from orders as o  join orderdetails as od on (o.OrderID = od.OrderID)
+group by 1, monthname(o.OrderDate)
+order by "Month";
+
+select * from sales_by_year_month;
+
+
+/*3*/
+drop view if exists employees_salary;
+
+
+create view employees_salary
+as
+select EmployeeID as ID, concat(FirstName,' ',LastName) as Nama, j.JobDesc as Pekerjaan, j.Salary as Gaji
+from employees as e join jobs as j on (e.JobID = j.JobID)
+order by 2;
+
+select * from employees_salary;
+
+/*4*/
+drop view if exists food_sales;
+
+create view food_sales
+as
+select f.F_OrderID as ID,
+ r.F_OrderDate as "Date",
+ concat(e.FirstName,' ',e.LastName) as "Employee Name",
+ p.ProductName as "Order Food",
+ f.Price as Price,
+ f.Qty as Quantity,
+ f.Price*f.Qty as Total
+from forderdetails as f 
+join restaurant as r on (r.F_OrderID = f.F_OrderID) 
+join employees as e on (r.EmployeeID = e.EmployeeID) 
+join products as p on (f.ArticleID = p.ArticleID);
+
+select * from food_sales;
+
+/*5*/
+create user 'Aldwin' identified by 'aldsetiawan';
+create user 'Hansen' identified by 'hnsedrick';
+create user 'Reza' identified by 'rzasatyawijaya';
+create user 'Sintya' identified by 'styoktaviani';
+
+/*6*/
+grant select 
+on sales_by_year_month
+to Aldwin
+with grant option;
+
+grant select 
+on food_sales
+to Aldwin
+with grant option;
+
+grant select 
+on employees_salary
+to Hansen;
+
+grant select 
+on service_and_total
+to Reza;
+
+/*7*/
+exit
+
+mysql -u Aldwin -p
+aldsetiawan
+
+use ikea;
+
+select s.Year, sum(s.`Jumlah Transaksi`) as "Total Transaksi" , 
+concat("Rp. ",sum(SUBSTRING(s.Sales,4,CHARACTER_LENGTH(s.Sales))),",-") as "Pendapatan Bruto" 
+from sales_by_year_month as s group by 1;
+
+grant select 
+on food_sales
+to Sintya;
+
+exit
+
+mysql -u Sintya -p
+styoktaviani
+
+use ikea;
+
+select f.`Order Food` as Food, concat("Rp. ",sum(f.Total)) as Sales from food_sales as f group by 1 order by 2 desc;
+
+/*8*/
+
+exit
+
+mysql -u Hansen -p
+hnsedrick
+
+use ikea;
+
+select e.Nama as "Employee Name", e.Pekerjaan as Job, e.Gaji as Salary from employees_salary as e order by 3 desc limit 4;
+
+/*9*/
+
+exit
+
+mysql -u Reza -p
+rzasatyawijaya
+
+use ikea;
+
+select concat("Rp. ",sum(s.Service),",-") as "Total Pendapatan dari Delivery Service" from service_and_total as s where s.`Service Type` like('%Delivery%');
+
+/*10*/
+
+exit 
+
+mysql -h localhost -u root
+
+use ikea;
+
+drop user Aldwin;
+
+drop user Hansen;
+
+drop user Reza;
+
+drop user Sintya;
+
+/*11*/
+drop view sales_by_year_month;
+
+drop view food_sales;
+
+drop view employees_salary;
+
+drop view service_and_total;
+
+

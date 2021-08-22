@@ -1,0 +1,182 @@
+mysql -u root
+show databases;
+drop database toko;
+create database toko;
+use toko;
+SOURCE D://toko.sql;
+
+/*1*/
+
+/*
+entity customers
+pk = customernumbers
+fk = salesRepEmployeeNumber
+
+entity employees
+pk = employeeNumber
+fk = officeCode
+
+entity offices
+pk = officeCode
+
+entity orderdetails
+pk = orderNumber, productCode
+fk = orderNumber , productCode
+
+entity orders
+pk = orderNumber
+fk = customernumbers
+
+entity payments
+pk = customernumbers, checkNumber
+fk = customernumbers
+
+entity productlines
+pk = productLine
+
+entity products
+pk = productCode
+fk = productLine
+*/
+
+/*2*/
+select o.customernumber as "ID Customer", customerName as Nama from orders as o join customers as c on (c.customernumber = o.customernumber) group by 1 having count(*) >= 3
+order by 2;
+
+/*3
+Buat query untuk menampilkan nama produk, vendor produk, dan jumlah produk yang dipesan (jumlah produk yang dipesan minimal 25 pcs dan harga satuannya lebih besar dari $50). Tampilkan juga keterangan di bagian bawahnya "Ini adalah produk yang cukup laris di toko ini".*/
+select productName as "Nama Produk", productVendor as "Vendor Produk", count(*) as jumlah
+from products as p join orderdetails as od on (p.productCode = od.productCode)
+where p.buyPrice >= 50
+group by od.productCode having jumlah >= 25
+union 
+select "","",""
+union 
+select "Ini adalah produk yang cukup laris di toko ini"," "," ";
+
+/*4
+Rupanya, ada perubahan harga beli secara mendadak, semua produk harganya dinaikkan sebesar %5. Anda diminta untuk melakukan update database. Lalu setelah beberapa hari, ada akusisi dari perusahaan besar yang menamakan diri "Go Blog" dan anda diminta untuk menambahan nama Go Blog untuk setiap nama produk.
+
+Sebulan kemudian Go Blog menarik sahamnya dari perusahaan, akhirnya anda harus mengembalikan database seperti keadaan semula, kecuali harga beli produk yang sudah naik.
+*/
+set @@AUTOCOMMIT = 0;
+select productName, MSRP from products;
+
+update products
+set MSRP = MSRP * 1.05;
+
+select productName, MSRP from products;
+savepoint buyPriceup;
+
+update products
+set productName = concat("Go Blog ", productName);
+
+select productName, MSRP from products;
+
+rollback to savepoint buyPriceup;
+
+select productName, MSRP from products;
+set @@AUTOCOMMIT = 1;
+
+/*5
+Anda merekrut seorang pegawai baru bernama Baskoro. Anda harus membuatkan ia sebuah akun dengan username 'baskoro' dan password 'sayurkol'.
+Baskoro diberikan previlege untuk membuat view dan select pada tabel-tabel yang ada di database. Ia tidak diizinkan untuk melakukan update database karena itu hanyalah wewenang anda, sehingga Baskoro tidak bisa melakukan update database.
+*/
+drop user 'baskoro'@'localhost';
+create user 'baskoro'@'localhost'
+identified by 'sayurkol';
+
+grant select, create view on * to 'baskoro'@'localhost';
+/*6
+Hari pertama Baskoro bekerja di kantor, ia harus membuat sebuah view untuk menampung dan menampilkan nama karyawan dan job desknya yang merupakan bawahan dari Patterson William.
+
+Setelah Baskoro membuat view, ia diminta untuk menampilkan hasil viewnya sebagai bukti.
+*/
+\q
+mysql -h localhost -u baskoro -p
+sayurkol
+
+use classicmodels;
+
+create view employeePatter
+as
+select concat(firstName," ",lastName) as Nama, jobTitle as "Job Description"
+from employees
+where reportsTo = "1088";
+
+select * from employeePatter;
+/*Soal 7
+Karena ada diskon 12.12, anda diminta membuatkan procedure dengan input diskon. Procedure yang dibuat harus menampikan kode produk, nama produk, vendor produk, harga normal, dan harga setelah diskon.
+
+Setelah procedure dibuat, anda diminta memasukkan diskon sebesar 30% dan 45%.*/
+
+\q
+mysql -u root
+use classicmodels;
+
+drop procedure diskon;
+DELIMITER //
+create procedure diskon( in persen int )
+begin
+	declare besardiskon float; 
+	set besardiskon = persen * 0.01;
+	select productCode as "Kode Produk",productName as "Nama Produk",productVendor as "Vendor Produk", MSRP as "Harga Normal", round(MSRP-(MSRP*besardiskon),2) as "Harga Setelah Diskon"
+	from products;
+END //
+Delimiter ;
+
+call diskon (30);
+call diskon (45);
+/*
+Soal 8
+Buatlah sebuah function untuk menampilkan nama customer yang melakukan transaksi pada bulan Februari 2005 dan jumlah transaksinya melebihi $5000. Setelah membuat function, tampilkan hasil dari function tersebut sebagai bukti.
+*/
+drop function febtrans;
+
+DELIMITER //
+create function febtrans (tanggaldate date,amount int, customernum int(11), checkNum varchar(50)) returns varchar(100)
+BEGIN
+	declare nama varchar(100);
+	if month(tanggaldate) = 2 and year(tanggaldate) = 2005 and amount >= 5000 then
+		set nama = (select concat(c.contactfirstname,' ',c.contactlastname) from customers as c join payments as p on (c.customernumber = p.customernumber)
+		where customernum = p.customernumber and checkNum = p.checkNumber);
+	else
+		set nama = "Data tidak cocok";
+	end if;
+	return nama;
+END //
+Delimiter ;
+
+select febtrans(paymentDate,amount,customernumber,checkNumber), paymentDate,amount from payments;
+
+/*
+Soal 9 
+Karena customer yang banyak, bos menginginkan anda membuat trigger untuk menampilkan notifikasi "Customer baru berhasil ditambahkan" ketika ada penambahan customer dan "Seorang customer berhasil dihapus dari database" ketika ada customer yang berhasil dihapus.
+
+Buatlah uji coba insert dan delete sederhana untuk menguji trigger yang telah dibuat.
+*/
+
+drop trigger triggerInsertCustomer;
+
+DELIMITER //
+create trigger triggerInsertCustomer
+	after insert on customers for each row
+BEGIN
+	SIGNAL SQLSTATE '02000' SET MESSAGE_TEXT = 'Customer baru berhasil ditambahkan';
+END //
+Delimiter ;
+
+insert into customers
+values(497,'Toko Ambek','Roni','Michael','+64 9 5555500','Arenales 1938 3\'A\'',NULL,'Auckland  ',NULL,NULL,'New Zealand',1612,'110000.00');
+
+drop trigger triggerDeleteCustomer;
+
+DELIMITER //
+create trigger triggerDeleteCustomer
+	after delete on customers for each row
+BEGIN
+	call my_signal(
+END //
+Delimiter ;
+
+delete from customers where customernumber = "497";

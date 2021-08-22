@@ -1,0 +1,77 @@
+mysql -u root;
+create database ikea;
+use ikea;
+drop ikea;
+SOURCE D:/ikea.sql
+
+select concat(employees.FirstName,' ',employees.LastName) as Nama, jobs.Salary 
+from employees join jobs on (employees.JobID = jobs.JobID)
+order by 1;
+
+select shelves.ShelfID
+from shelves 
+join products on ( shelves.ShelfID = products.ShelfID)
+group by 1
+order by count(products.stock) desc
+limit 3;
+
+select jobs.JobDesc as Jobs, count(*) as Jumlah 
+from employees 
+join jobs on (jobs.JobID = employees.JobID)
+group by employees.JobID;
+
+select products.ProductName as Products
+from products join producttype on (products.TypeID = producttype.TypeID)
+where producttype.TypeName like ('%METOD%')
+union
+select concat('Found ',count(*),' Results') from products join producttype on (products.TypeID = producttype.TypeID)
+where producttype.TypeName like ('%METOD%');
+
+
+/*kalo di lab jalan dan bener*/
+select concat(FirstName,' ',LastName) as 'Nama'
+from employees
+where ManagerID is NULL and DeptID is NOT NULL
+group by DeptID
+order by concat(FirstName,' ',LastName);
+
+select r.F_OrderID as "Order ID" , sum(f.price) as "Total Price"
+from restaurant as r join forderdetails as f on (r.F_OrderID = f.F_OrderID)
+where month(r.F_OrderDate) = 01
+group by 1
+union 
+select "Total" ,sum(d.SumPrice) as Total
+from (select restaurant.F_OrderID , sum(forderdetails.price) as SumPrice
+from restaurant join forderdetails on (restaurant.F_OrderID = forderdetails.F_OrderID)
+where month(restaurant.F_OrderDate) = 01
+group by 1) as d;
+
+select concat(FirstName,' ',LastName) as Name , j.JobDesc, count(F_OrderID) as Work
+from employees as e join restaurant as r on (e.EmployeeID = r.EmployeeID) join jobs as j on (j.JobID = e.JobID)
+group by e.EmployeeID
+union
+select concat(FirstName,' ',LastName) as Name , j.JobDesc, count(OrderID)
+from employees as e join orders as o on (e.EmployeeID = o.EmployeeID) join jobs as j on (j.JobID = e.JobID)
+group by e.EmployeeID
+order by 3 desc;
+
+select orders.OrderID, sum(orderdetails.Price) as 'Total Revenue'
+from orders
+join orderdetails
+using (OrderID)
+where orderdetails.Price > 500000
+group by orderdetails.OrderID
+union
+select restaurant.F_OrderID, sum(forderdetails.Price) as 'Total Revenue'
+from restaurant
+join forderdetails
+on (restaurant.F_OrderID = forderdetails.F_OrderID)
+where forderdetails.Price > 500000
+group by forderdetails.F_OrderID;
+
+select concat(e1.FirstName,' ',e1.LastName) as "Manager", 
+group_concat(e2.FirstName,' ',e2.LastName) as 'Employee'
+from employees as e1
+join employees as e2 
+on (e1.EmployeeID = e2.ManagerID)
+group by e1.EmployeeID;

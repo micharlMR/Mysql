@@ -1,0 +1,109 @@
+mysql -h localhost -u root
+
+set sql_mode ='';
+
+drop database ikea;
+create database ikea;
+use ikea;
+SOURCE D:/ikea.sql;
+
+
+drop procedure diskon;
+Delimiter // 
+CREATE PROCEDURE diskon ( in persen integer )
+begin
+	select ProductName as "Product Name", 
+	concat("Rp. ",round(Price*(persen*0.01),0)) as "Harga Setelah Didiskon" 
+	from products
+	order by Price
+	limit 10;
+end//
+Delimiter ; 
+
+call diskon(50);
+
+drop procedure counting;
+Delimiter // 
+CREATE PROCEDURE counting ( in kalimat varchar(100) )
+BEGIN
+    DECLARE wordCnt, idx, maxIdx INT DEFAULT 0;
+    DECLARE currChar, prevChar BOOL DEFAULT 0;
+    SET maxIdx=char_length(kalimat);
+    SET idx = 1;
+    WHILE idx <= maxIdx DO
+        SET currChar=SUBSTRING(kalimat, idx, 1) RLIKE '[[:alpha:]]';
+        IF NOT prevChar AND currChar THEN
+            SET wordCnt=wordCnt+1;
+        END IF;
+        SET prevChar=currChar;
+        SET idx=idx+1;
+    END WHILE;
+    select wordCnt as "Total Kata";
+  END//
+Delimiter ; 
+
+call counting('i tot i taw a putty tat');
+
+call counting('Be Mature is A Must ! Be Childish is A Need ...');
+
+drop procedure prima;
+Delimiter //
+create procedure prima ( in angka int )
+BEGIN
+	declare idx, hitungprima int;
+	set idx = 1;
+	set hitungprima = 0;
+	while idx <= angka do
+		if angka % idx = 0 then
+			set hitungprima = hitungprima + 1;
+		end if;
+		set idx = idx + 1;
+	end while;
+	select if(hitungprima = 2,"Prima","Bukan Prima") as jawaban;
+end//
+Delimiter ;
+
+call prima(7);
+call prima(20);
+
+drop procedure box;
+delimiter //
+create procedure box(in x int , in y int)
+	BEGIN
+		declare i, j int;
+		declare temp varchar(50);
+		create temporary table baris(setring varchar(100));
+			set i = 1;
+			while i <= (x*y)-1 do
+				set temp = "";
+				/*set i = i + 1;*/
+				set j = 0;
+				while j < (x*y)+1 do
+					if(i = 1 or i = (x*y)-1 or i % y = 0) then
+						if(j = 0 or j = (x*y)+1 or j % y = 0) then
+							set temp = concat(temp,'+');
+						else
+							set temp = concat(temp,'-');
+						end if;
+					else
+						if(j = 0 or j = (x*y)+1 or j % y = 0) then
+							set temp = concat(temp,'|');
+						else
+							set temp = concat(temp,' ');
+						end if;
+					end if;
+					set j = j + 1;
+				end while;
+				insert into baris values (temp);
+				set i = i + 1;
+			end while;
+			select setring as "Box" from baris;
+		drop temporary table baris;
+	end //
+delimiter ;
+
+call box (2,5);
+call box (3,5);
+
+			
+		

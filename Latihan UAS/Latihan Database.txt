@@ -1,0 +1,52 @@
+Express Exercise Database System
+
+Catatan: Sengaja gk dibuat screenshot, supaya kalian belajar yang terpenting dalam database bukan untuk sama persis dengan screenshot orang, tetapi yang terpenting adalah keakuratan jumlah data yang ditampilkan dan sesuai dengan apa yang diminta.
+
+Silahkan import file sql untuk file pendukung latihan.
+Jawab soal2 di bawah ini dalam 1 file txt, apabila soal berupa pertanyaan teoritis (jelaskan, sebutkan dan sejenisnya) tetap jawab di file txt (dijadikan comment)
+
+Soal 1
+Dari skema yang sudah didapatkan, tentukan variable kolom mana saja yang termasuk Primary Key dan Foreign Key!
+
+
+Soal 2
+Tampilkan Customer Number dan nama customer yang melakukan pemesanan lebih dari 2 kali, urutkan sesuai abjad nama customer.
+
+Soal 3
+Buat query untuk menampilkan nama produk, vendor produk, dan jumlah produk yang dipesan (jumlah produk yang dipesan minimal 25 pcs dan harga satuannya lebih besar dari $50). Tampilkan juga keterangan di bagian bawahnya "Ini adalah produk yang cukup laris di toko ini".
+
+
+Soal 4
+Rupanya, ada perubahan harga beli secara mendadak, semua produk harganya dinaikkan sebesar %5. Anda diminta untuk melakukan update database. Lalu setelah beberapa hari, ada akusisi dari perusahaan besar yang menamakan diri "Go Blog" dan anda diminta untuk menambahan nama Go Blog untuk setiap nama produk.
+
+Sebulan kemudian Go Blog menarik sahamnya dari perusahaan, akhirnya anda harus mengembalikan database seperti keadaan semula, kecuali harga beli produk yang sudah naik.
+
+
+
+Soal 5
+Anda merekrut seorang pegawai baru bernama Baskoro. Anda harus membuatkan ia sebuah akun dengan username 'baskoro' dan password 'sayurkol'.
+Baskoro diberikan previlege untuk membuat view dan select pada tabel-tabel yang ada di database. Ia tidak diizinkan untuk melakukan update database karena itu hanyalah wewenang anda, sehingga Baskoro tidak bisa melakukan update database.
+
+
+
+Soal 6
+Hari pertama Baskoro bekerja di kantor, ia harus membuat sebuah view untuk menampung dan menampilkan nama karyawan dan job desknya yang merupakan bawahan dari Patterson William.
+
+Setelah Baskoro membuat view, ia diminta untuk menampilkan hasil viewnya sebagai bukti.
+
+
+Soal 7
+Karena ada diskon 12.12, anda diminta membuatkan procedure dengan input diskon. Procedure yang dibuat harus menampikan kode produk, nama produk, vendor produk, harga normal, dan harga setelah diskon.
+
+Setelah procedure dibuat, anda diminta memasukkan diskon sebesar 30% dan 45%.
+
+
+
+Soal 8
+Buatlah sebuah function untuk menampilkan nama customer yang melakukan transaksi pada bulan Februari 2005 dan jumlah transaksinya melebihi $5000. Setelah membuat function, tampilkan hasil dari function tersebut sebagai bukti.
+
+
+Soal 9 
+Karena customer yang banyak, bos menginginkan anda membuat trigger untuk menampilkan notifikasi "Customer baru berhasil ditambahkan" ketika ada penambahan customer dan "Seorang customer berhasil dihapus dari database" ketika ada customer yang berhasil dihapus.
+
+Buatlah uji coba insert dan delete sederhana untuk menguji trigger yang telah dibuat. (bebas)

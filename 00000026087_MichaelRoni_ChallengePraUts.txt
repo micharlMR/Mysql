@@ -1,0 +1,168 @@
+mysql -u root
+
+drop database StarkMagicShop;
+create database StarkMagicShop;
+use StarkMagicShop;
+
+create table job
+(
+	job_id varchar(5) primary key,
+	job_title varchar(30) not null
+);
+
+create table employee
+(
+	employee_id varchar(5) primary key,
+	name varchar(20) not null,
+	job_id varchar(5),
+	salary int not null,
+	address varchar(50) not null,
+	foreign key(job_id) references job(job_id)
+);
+
+create table shelf
+(
+	shelf_id varchar(5) primary key,
+	shelf_location varchar(20) not null,
+	employee_id varchar(5),
+	foreign key(employee_id) references employee(employee_id)
+);
+
+create table product
+(
+	product_id varchar(5) primary key,
+	product_name varchar(20) not null,
+	product_price int not null,
+	product_stock int,
+	product_location varchar(5),
+	foreign key (product_location) references shelf(shelf_id)
+);
+
+create table transaksi
+(
+	transaction_id varchar(5) primary key,
+	transaction_date date not null,
+	product_id varchar(5),
+	quantity int not null,
+	employee_id varchar(5),
+	foreign key (product_id) references product(product_id),
+	foreign key (employee_id) references employee(employee_id)
+);
+
+insert into job
+values
+	('J0001','President'),
+	('J0002','Vice President'),
+	('J0003','Secretary'),
+	('J0004','Shelf Supervisor'),
+	('J0005','Transaction Supervisor'),
+	('J0006','Shelf Staff'),
+	('J0007','Transaction Staff'),
+	('J0008','Regular Staff');
+
+insert into employee
+values ('E0001','Antoine Morisson','J0001','32450000','South Baywatch Avenue no.41');
+insert into employee
+values ('E0002','Abigail Elisa','J0002','27430000','Premiere Residence, N-1209');
+insert into employee
+values ('E0003','Lucia Evelyn','J0003','18220000','Cluster Salt and Pepper no. 72');
+insert into employee
+values ('E0004','Christioan Black','J0003','16760000','Bougenville Park II B1 16');
+insert into employee
+values ('E0005','Jeremy Alexander','J0004','13850000','Stark Tower A Room 1367');
+insert into employee
+values ('E0006','Maximillan Jeremiah','J0005','12430000','Stark Tower C Room 0915');
+insert into employee
+values ('E0007','Diana Valentina','J0006','11210000','Peaceful Residence A3 19');
+insert into employee
+values ('E0008','Wayne Brosman','J0006','11500000','Zigzag Plant Condominium F0311');
+insert into employee
+values ('E0009','Rosemarie Callista','J0007','10825000','Female CondoVilla B1807');
+insert into employee
+values ('E0010','Gabriella Violes','J0007','10250000','East Bohrman Village no. 54');
+insert into employee
+values ('E0011','Nathalia Monica','J0008','9710000','Stark Domitory Room 213');
+insert into employee
+values ('E0012','Colin Octaviano','J0008','9250000','Stark Dormitory Room 517');
+insert into employee
+values ('E0013','Ryan Rodriguez','J0008','8450000','Stark Dormitory Room 622');
+insert into employee
+values ('E0014','Devina Octaviani','J0008','7900000','Stark Dormitory Room 224');
+insert into employee
+values ('E0015','Grace','J0008','7670000','Stark Dormitory Room 331');
+
+insert into shelf
+values 
+('S0001','Room A1','E0007'),
+('S0002','Room A2','E0012'),
+('S0003','Room A3','E0015'),
+('S0004','Room B1','E0008'),
+('S0005','Room B2','E0013'),
+('S0006','Room B3','E0011');
+
+insert into product
+values ('P0001','Anti Gravity Cloak','899000','6','S0001');
+insert into product
+values ('P0002','Bulletproof Cloak','1199000','3','S0001');
+insert into product
+values ('P0003','Lightining Punching Gloves','875000','10','S0002');
+insert into product
+values ('P0004','Fire Punching Gloves','875000','4','S0002');
+insert into product
+values ('P0005','Dragon Claw','1850000','2','S0003');
+insert into product
+values ('P0006','Hyper Potion','650000','0','S0004');
+insert into product
+values ('P0007','Full Heal','320000','9','S0004');
+insert into product
+values ('P0008','Joker Mask','140000','1','S0005');
+insert into product
+values ('P0009','WarGreymon Shield','750000','5','S0001');
+insert into product
+values ('P0010','Magna Sword','3600','3','S0003');
+
+insert into transaksi
+values ('T0001','2017-09-23','P0004','2','E0009');
+insert into transaksi
+values ('T0002','2017-09-23','P0004','3','E0009');
+insert into transaksi
+values ('T0003','2017-09-23','P0004','3','E0009');
+insert into transaksi
+values ('T0004','2017-09-24','P0004','1','E0010');
+insert into transaksi
+values ('T0005','2017-09-25','P0004','2','E0009');
+insert into transaksi
+values ('T0006','2017-09-25','P0004','4','E0010');
+insert into transaksi
+values ('T0007','2017-09-25','P0004','1','E0015');
+insert into transaksi
+values ('T0008','2017-09-25','P0004','1','E0014');
+insert into transaksi
+values ('T0009','2017-09-26','P0004','3','E0014');
+insert into transaksi
+values ('T0010','2017-09-26','P0004','5','E0010');
+insert into transaksi
+values ('T0011','2017-09-26','P0004','1','E0009');
+insert into transaksi
+values ('T0012','2017-09-27','P0004','4','E0009');
+insert into transaksi
+values ('T0013','2017-09-27','P0004','1','E0012');
+insert into transaksi
+values ('T0014','2017-09-28','P0004','3','E0011');
+insert into transaksi
+values ('T0015','2017-09-29','P0004','2','E0013');
+
+select employee_id,name,salary from employee order by 3 limit 5;
+
+select name from employee where name like('__a%');
+
+update employee set job_id ='J0006' where name='Nathalia Monica';
+
+select name, (select job_title from job where job_id = employee.job_id) ,salary from employee where name='Nathalia Monica';
+
+select (select lpad('',truncate(sum(Salary)/count(Employee_ID)/1000000,0),'$')
+from Employee where employee.Job_ID = Job.Job_ID group by Job_ID) as 'Level Gaji',
+Job_ID as 'Job ID',
+Job_Title as 'Job Title'
+from Job
+order by Job_ID;

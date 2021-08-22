@@ -1,0 +1,58 @@
+mysql -u root
+drop database restoran;
+create database restoran;
+use restoran;
+
+create table Menu(
+	IDMenu varchar(5) primary key,
+	NamaMenu varchar(50) not null,
+	Kategori varchar(20) not null,
+	Harga int not null
+);
+
+create table Orderan(
+	IDOrder varchar(5) primary key,
+	NomorMeja varchar(5) not null,
+	JamMasuk varchar(4) not null,
+	JamKeluar varchar(4)
+);
+
+create table MenuOrder(
+	IDMenu varchar(5),
+	IDOrder varchar(5),
+	foreign key (IDMenu) references Menu(IDMenu),
+	foreign key (IDOrder) references Orderan(IDOrder)
+);
+
+insert into menu
+values('MN001','Nasi Putih','Makanan Pokok','5000');
+insert into menu
+values('MN002','Tahu Goreng','Lauk','4000');
+insert into menu
+values('MN003','Air Mineral','Minuman','3000');
+insert into menu
+values('MN004','Ayam Goreng','Lauk','15000');
+
+insert into Orderan
+values('OD001','1','10.00','11.00');
+insert into Orderan
+values('OD002','2','11.00','13.00');
+insert into Orderan
+values('OD003','1','15.00','15.30');
+insert into Orderan
+values('OD004','1','15.00','15.30');
+
+insert into MenuOrder
+values('MN001','OD001');
+insert into MenuOrder
+values('MN002','OD001');
+insert into MenuOrder
+values('MN003','OD001');
+insert into MenuOrder
+values('MN001','OD002');
+insert into MenuOrder
+values('MN004','OD002');
+insert into MenuOrder
+values('MN002','OD003');
+insert into MenuOrder
+values('MN004','OD004');
